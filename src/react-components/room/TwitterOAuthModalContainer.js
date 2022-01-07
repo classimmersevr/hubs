@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { TwitterOAuthModal } from "./TwitterOAuthModal";
 import configs from "../../utils/configs";
 
-export function TwitterOAuthModalContainer({ hubChannel, onConnected, onClose }) {
+export function TwitterOAuthModalContainer({ hubChannel, onConnected, onClose, isAdmin }) {
   const popupRef = useRef();
 
   const onConnect = useCallback(
@@ -30,17 +30,16 @@ export function TwitterOAuthModalContainer({ hubChannel, onConnected, onClose })
         popup.focus();
         popupRef.current = popup;
       } catch (error) {
-        if (error === "twitter_probably_misconfigured") {
-          console.error(
-            "Twitter might be misconfigured. Check the docs here: https://hubs.mozilla.com/docs/hubs-cloud-enable-media-browser.html#twitter"
+        console.error(error);
+        if (error === "twitter_api_error" && isAdmin) {
+          console.warn(
+            "Twitter might be misconfigured for Hubs Cloud. Check the docs here: https://hubs.mozilla.com/docs/hubs-cloud-third-party-integrations.html#twitter"
           );
-        } else {
-          console.error(error);
         }
         onClose();
       }
     },
-    [hubChannel]
+    [hubChannel, isAdmin]
   );
 
   useEffect(
@@ -74,5 +73,6 @@ export function TwitterOAuthModalContainer({ hubChannel, onConnected, onClose })
 TwitterOAuthModalContainer.propTypes = {
   hubChannel: PropTypes.object.isRequired,
   onConnected: PropTypes.func.isRequired,
-  onClose: PropTypes.func
+  onClose: PropTypes.func,
+  isAdmin: PropTypes.bool
 };
